@@ -75,17 +75,17 @@ so **baud rate = bits per second (bps).**
 
 ### 🔸 Common Baud Rates
 
-9600 bps
+- 9600 bps
 
-19200 bps
+- 19200 bps
 
-38400 bps
+- 38400 bps
 
-57600 bps
+- 57600 bps
 
-115200 bps
+- 115200 bps
 
-1 Mbps
+- 1 Mbps
 
 Higher baud rate → faster communication
 But also → more sensitive to noise
@@ -94,15 +94,15 @@ But also → more sensitive to noise
 
 UART is **asynchronous** (no shared clock).
 
-Transmitter and receiver **agree on timing in advance**
+- Transmitter and receiver **agree on timing in advance**
 
-Receiver samples bits based on baud rate
+- Receiver samples bits based on baud rate
 
 ❌ If baud rate mismatches:
 
-Receiver samples at wrong time
+- Receiver samples at wrong time
 
-Bits shift → **garbage data**
+- Bits shift → **garbage data**
 
 ### 🔸 Example: Baud Rate = 9600
 ```sql
@@ -113,11 +113,11 @@ Bits shift → **garbage data**
 
 For a common **8N1**frame:
 
-1 start bit
+- 1 start bit
 
-8 data bits
+- 8 data bits
 
-1 stop bit
+- 1 stop bit
 
 📌 Total = **10 bits per character**
 
@@ -128,17 +128,17 @@ For a common **8N1**frame:
 
 Even though baud rate = 9600 bps:
 
-Actual data bits per frame = 8
+- Actual data bits per frame = 8
 
-Total bits per frame = 10
+- Total bits per frame = 10
 
 **📌 Effective data rate < baud rate**
 
 This is why:
 
-Higher overhead → lower throughput
+- Higher overhead → lower throughput
 
-Parity + extra stop bits reduce usable data
+- Parity + extra stop bits reduce usable data
 
 ### 🔥 Interview Tip (One-liner)
 
