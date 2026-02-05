@@ -210,11 +210,11 @@ Used for error detection (not correction).
 
 - Can be:
 
--  1 stop bit
+  - 1 stop bit
 
--  1.5 stop bits
+  - 1.5 stop bits
 
--  2 stop bits
+  - 2 stop bits
 
 Purpose:
 
@@ -256,3 +256,267 @@ Start(0) → 8 Data Bits → Stop(1)
 ### 🔥 Interview One-Liner
 
 UART uses a start bit to synchronize communication, data bits to transfer information, an optional parity bit for error detection, and one or more stop bits to mark the end of the frame. The most common configuration is 8N1.
+
+## 🔴 Framing Error (UART)
+### 🔹 What is a Framing Error?
+
+A framing error occurs when the UART does not detect the expected STOP bit (logic HIGH) at the correct time.
+
+📌 In simple words:
+👉 The receiver loses track of where the character ends.
+
+### 🔹 Why STOP Bit Matters
+
+UART has no clock, so the receiver:
+
+Detects the start bit
+
+Samples bits based on the configured baud rate
+
+Expects the stop bit at the end
+
+If the stop bit is missing or not HIGH, the frame is considered invalid.
+
+### 🔹 When Does Framing Error Occur?
+#### 1️⃣ Baud Rate Mismatch (Most Common)
+
+Example:
+
+Transmitter: 9600 bps
+
+Receiver: 115200 bps
+
+⏱ Receiver samples at the wrong time → stop bit check fails.
+
+📌 Result: framing error flag set.
+
+#### 2️⃣ Noise on the Line
+
+Electrical interference
+
+Long wires
+
+Poor grounding
+
+Noise can flip the stop bit from 1 → 0.
+
+📌 Receiver thinks frame never ended.
+
+#### 3️⃣ Wrong Frame Configuration
+
+Transmitter: 8N1
+
+Receiver: 8E1 or 8N2
+
+📌 Parity/stop bit expectations don’t match.
+
+### 🔹 What Happens Internally?
+
+UART hardware sets Framing Error (FE) flag
+
+Received byte may be discarded or corrupted
+
+Next bytes may also be misaligned
+
+📌 Receiver loses synchronization.
+
+### 🔹 How to Detect a Framing Error
+
+Check UART status register
+
+FE flag indicates stop bit failure
+
+Example (conceptual):
+
+if (UART_STATUS & FRAMING_ERROR) {
+    // handle error
+}
+
+### 🔹 How to Fix / Prevent Framing Errors
+
+✔ Match baud rate exactly
+✔ Match frame format (8N1, parity, stop bits)
+✔ Use proper grounding
+✔ Keep UART lines short
+✔ Lower baud rate if noise exists
+✔ Use shielding if required
+
+### 🔥 Interview-Ready One-Liner
+
+A framing error occurs when the UART receiver fails to detect a valid stop bit, usually due to baud rate mismatch, noise, or incorrect frame configuration, causing loss of byte boundary synchronization.
+
+## 🔹 Framing Error
+### ✅ What is a Framing Error?
+
+A framing error occurs when the UART receiver does not detect a valid stop bit at the expected time.
+
+📌 In simple words:
+
+The receiver loses track of where one data frame ends.
+
+### 🔸 Why Stop Bit Matters
+
+UART frame:
+
+Start(0) → Data bits → (Parity) → Stop(1)
+
+
+Stop bit must be HIGH
+
+It tells the receiver: “This byte is finished”
+
+If stop bit is missing or wrong → Framing Error
+
+### 🔸 Causes of Framing Error
+
+Baud rate mismatch (most common)
+
+Noise or signal distortion
+
+Incorrect UART configuration (stop bits)
+
+Clock drift in long communication
+
+### 🔸 Effect
+
+Receiver may:
+
+Discard the byte
+
+Misalign the next frames
+
+Data becomes unreliable
+
+📌 Receiver doesn’t know where the frame ends
+
+### 🔸 Real-Life Example
+
+MCU baud rate = 9600
+
+PC baud rate = 115200
+
+➡ Stop bit sampled at the wrong time
+➡ Framing error occurs
+
+### 🔹 Parity Error
+#### ✅ What is a Parity Error?
+
+A parity error occurs when the received parity bit does not match the calculated parity of received data bits.
+
+#### 🔸 How Parity Works (Quick Recap)
+
+Example (Even parity):
+
+Data: 1011001
+Number of 1s = 4 (even)
+Parity bit = 0
+
+If receiver counts odd number of 1s → Parity Error
+
+#### 🔸 Causes of Parity Error
+
+Noise flipping a bit
+
+Signal integrity issues
+
+Long cables / EMI
+
+#### 🔸 Effect
+
+Receiver detects error
+
+But cannot correct the data
+
+📌 Parity can detect only single-bit errors
+
+### 🔹 Key Differences (Interview Favorite)
+Feature |	Framing Error	| Parity Error
+|:--- |:--- |:--- |
+Related to |	Stop bit |	Parity bit
+Error type|	Timing / frame boundary	| Data integrity
+Main cause | Baud mismatch, noise |	Bit flip
+Detection |	Hardware UART |	Parity logic
+Correction |	❌ No |	❌ No
+### 🔥 One-Line Interview Answers
+
+**Framing Error:**
+
+Occurs when the stop bit is not detected correctly, usually due to baud rate mismatch or noise, causing loss of frame synchronization.
+
+**Parity Error:**
+
+Occurs when the received parity bit does not match the calculated parity, indicating a possible single-bit data error.
+
+## 🔹 Flow Control (UART)
+
+Flow control is used to prevent data loss when the receiver cannot process incoming data fast enough.
+
+📌 Without flow control → receiver buffer overflows → data is lost.
+
+## 🔸 Hardware Flow Control (RTS / CTS)
+
+Uses dedicated hardware signals.
+
+- RTS (Request To Send)
+→ Sender asks: “Can I send data?”
+
+- CTS (Clear To Send)
+→ Receiver replies: “Yes, I’m ready.”
+
+📌 Rule:
+Sender transmits data only when CTS is asserted (active).
+
+### ✅ Advantages
+
+- Very fast
+
+- Highly reliable
+
+- Not affected by data content
+
+### ❌ Disadvantages
+
+- Requires extra pins/wires
+
+- Not always available on low-pin MCUs
+
+📌 Used in:
+High-speed UART, industrial systems, modems
+
+## 🔸 Software Flow Control (XON / XOFF)
+
+Uses special control characters sent in data stream.
+
+- XOFF (0x13) → Receiver says: “Stop sending”
+
+- XON (0x11) → Receiver says: “Resume sending”
+
+📌 These characters are transmitted like normal UART data.
+
+### ✅ Advantages
+
+- No extra hardware pins required
+
+- Simple to implement
+
+### ❌ Disadvantages
+
+- Slower than hardware flow control
+
+- Control characters may conflict with actual data
+
+- Not reliable for binary data
+
+📌 Used in:
+Terminals, low-speed links, simple devices
+
+## 🔥 Hardware vs Software Flow Control (Quick Compare)
+Feature	RTS / CTS	XON / XOFF
+Extra pins	Yes	No
+Speed	Fast	Slower
+Reliability	High	Medium
+Data dependency	No	Yes
+Best for	High-speed	Low-speed
+## 🎯 Interview One-Liner
+
+Hardware flow control uses RTS/CTS signals to control data transmission at the hardware level, making it fast and reliable, while software flow control uses XON/XOFF control characters within the data stream and is slower but does not require extra pins.
