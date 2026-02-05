@@ -143,3 +143,116 @@ This is why:
 ### 🔥 Interview Tip (One-liner)
 
 Baud rate is the number of bits transmitted per second in UART, and since UART is asynchronous, both transmitter and receiver must use the same baud rate; otherwise, bit sampling errors cause corrupted data.
+
+## 🔹 Start Bit, Stop Bit, Parity (UART Frame)
+
+Since UART is asynchronous, the receiver must figure out when a frame starts and ends. That’s why start/stop/parity bits exist.
+
+### 🔹 UART Frame Format
+```scss
+Idle(1) → Start(0) → Data Bits → Parity → Stop(1)
+```
+
+- Idle state of UART line is HIGH (1)
+
+- A LOW (0) transition tells the receiver that data is starting
+
+### 🔸 Start Bit
+
+- Always LOW (0)
+
+- Duration = 1 bit time
+
+- Purpose:
+
+-  Synchronizes the receiver
+
+-  Tells receiver: “Start sampling data now”
+
+📌 Receiver detects falling edge (1 → 0) and starts counting bit timing.
+
+### 🔸 Data Bits
+
+- Actual useful data
+
+- Common values: 5, 6, 7, 8, or 9 bits
+
+- Most common: 8 bits
+
+📌 Sent LSB first (Least Significant Bit first)
+
+Example:
+```sql
+Data = 0x41 (ASCII 'A')
+Binary = 01000001
+Sent order → 1 0 0 0 0 0 1 0
+```
+
+### 🔸 Parity Bit (Optional)
+
+Used for error detection (not correction).
+
+▶ Even Parity
+
+- Total number of 1s (data + parity) = even
+
+▶ Odd Parity
+
+- Total number of 1s (data + parity) = odd
+
+📌 If received parity ≠ calculated parity → Parity Error
+
+⚠️ Detects only single-bit errors
+
+### 🔸 Stop Bit
+
+- Always HIGH (1)
+
+- Can be:
+
+-  1 stop bit
+
+-  1.5 stop bits
+
+-  2 stop bits
+
+Purpose:
+
+Marks end of frame
+
+Gives receiver time to prepare for next frame
+
+📌 Stop bit must be HIGH, otherwise framing error occurs.
+
+### 🔹 Common UART Format: 8N1
+
+Meaning:
+
+- 8 → Data bits
+
+- N → No parity
+
+- 1 → One stop bit
+
+Frame looks like:
+```scss
+Start(0) → 8 Data Bits → Stop(1)
+```
+
+
+📌 Most widely used UART configuration.
+
+### 🔹 Timing Example (9600 Baud, 8N1)
+
+- Bit time = 1 / 9600 ≈ 104 µs
+
+- Total bits per frame:
+```powershell
+1 start + 8 data + 1 stop = 10 bits
+```
+
+- Time per byte ≈ 1.04 ms
+
+### 🔥 Interview One-Liner
+
+UART uses a start bit to synchronize communication, data bits to transfer information, an optional parity bit for error detection, and one or more stop bits to mark the end of the frame. The most common configuration is 8N1.
